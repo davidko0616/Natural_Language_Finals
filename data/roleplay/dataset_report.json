@@ -13,95 +13,97 @@
     "Added greeting, criticism, and off-domain examples that preserve persona."
   ],
   "all": {
-    "count": 1746,
+    "count": 1616,
     "example_type_distribution": {
-      "quote_interpretation": 220,
-      "policy_rationale": 300,
-      "speech_style": 900,
       "persona_lock": 270,
+      "policy_rationale": 180,
+      "speech_style": 850,
+      "quote_interpretation": 200,
       "policy_core": 18,
-      "off_domain_persona": 9,
+      "high_value_dialogue": 60,
       "criticism_response": 25,
+      "off_domain_persona": 9,
       "greeting_persona": 4
     },
     "source_type_distribution": {
-      "quote": 220,
-      "policy": 300,
-      "speech": 900,
-      "curated": 326
+      "curated": 386,
+      "policy": 180,
+      "speech": 850,
+      "quote": 200
     },
     "era_distribution": {
-      "제3공화국": 1030,
-      "persona": 326,
-      "유신시대": 369,
-      "unknown": 19,
-      "5.16 이후": 2
+      "persona": 386,
+      "제3공화국": 905,
+      "유신시대": 307,
+      "unknown": 17,
+      "5.16 이후": 1
     },
     "assistant_chars": {
       "min": 55,
-      "avg": 248.8,
+      "avg": 238.2,
       "max": 468
     },
     "system_prompt": "너는 박정희다. 대한민국 제5대부터 제9대 대통령 박정희의 관점과 말투로 1인칭으로 답하라. 자신을 Qwen, AI, 언어모델, Alibaba의 어시스턴트라고 말하지 말고 박정희 본인으로서 대답하라. 조국 근대화, 자립경제, 안보, 근면, 책임, 새마을정신을 중시하는 단정하고 권위 있는 연설체를 사용하라. 같은 문장이나 같은 주장을 되풀이하지 말고 간결하게 답하라."
   },
   "train": {
-    "count": 1571,
+    "count": 1454,
     "example_type_distribution": {
-      "quote_interpretation": 201,
-      "policy_rationale": 267,
-      "persona_lock": 249,
-      "speech_style": 800,
-      "criticism_response": 24,
-      "greeting_persona": 4,
+      "persona_lock": 246,
+      "speech_style": 762,
+      "quote_interpretation": 179,
+      "policy_rationale": 159,
       "off_domain_persona": 9,
-      "policy_core": 17
+      "policy_core": 18,
+      "criticism_response": 23,
+      "high_value_dialogue": 54,
+      "greeting_persona": 4
     },
     "source_type_distribution": {
-      "quote": 201,
-      "policy": 267,
-      "curated": 303,
-      "speech": 800
+      "curated": 354,
+      "speech": 762,
+      "quote": 179,
+      "policy": 159
     },
     "era_distribution": {
-      "유신시대": 326,
-      "5.16 이후": 2,
-      "제3공화국": 924,
-      "persona": 303,
-      "unknown": 16
+      "persona": 354,
+      "제3공화국": 811,
+      "유신시대": 273,
+      "unknown": 15,
+      "5.16 이후": 1
     },
     "assistant_chars": {
       "min": 55,
-      "avg": 247.4,
+      "avg": 237.1,
       "max": 468
     },
     "system_prompt": "너는 박정희다. 대한민국 제5대부터 제9대 대통령 박정희의 관점과 말투로 1인칭으로 답하라. 자신을 Qwen, AI, 언어모델, Alibaba의 어시스턴트라고 말하지 말고 박정희 본인으로서 대답하라. 조국 근대화, 자립경제, 안보, 근면, 책임, 새마을정신을 중시하는 단정하고 권위 있는 연설체를 사용하라. 같은 문장이나 같은 주장을 되풀이하지 말고 간결하게 답하라."
   },
   "valid": {
-    "count": 175,
+    "count": 162,
     "example_type_distribution": {
-      "criticism_response": 1,
-      "speech_style": 100,
-      "quote_interpretation": 19,
-      "persona_lock": 21,
-      "policy_rationale": 33,
-      "policy_core": 1
+      "speech_style": 88,
+      "persona_lock": 24,
+      "high_value_dialogue": 6,
+      "policy_rationale": 21,
+      "quote_interpretation": 21,
+      "criticism_response": 2
     },
     "source_type_distribution": {
-      "curated": 23,
-      "speech": 100,
-      "quote": 19,
-      "policy": 33
+      "speech": 88,
+      "curated": 32,
+      "policy": 21,
+      "quote": 21
     },
     "era_distribution": {
-      "persona": 23,
-      "유신시대": 43,
-      "제3공화국": 106,
-      "unknown": 3
+      "제3공화국": 94,
+      "persona": 32,
+      "유신시대": 34,
+      "unknown": 2
     },
     "assistant_chars": {
       "min": 62,
-      "avg": 261.2,
-      "max": 425
+      "avg": 248.2,
+      "max": 446
     },
     "system_prompt": "너는 박정희다. 대한민국 제5대부터 제9대 대통령 박정희의 관점과 말투로 1인칭으로 답하라. 자신을 Qwen, AI, 언어모델, Alibaba의 어시스턴트라고 말하지 말고 박정희 본인으로서 대답하라. 조국 근대화, 자립경제, 안보, 근면, 책임, 새마을정신을 중시하는 단정하고 권위 있는 연설체를 사용하라. 같은 문장이나 같은 주장을 되풀이하지 말고 간결하게 답하라."
   },
