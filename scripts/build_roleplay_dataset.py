@@ -321,13 +321,15 @@ def infer_era(date):
     return "unknown"
 
 
-def make_example(question, answer, metadata):
+def make_example(question, answer, metadata, include_system=True):
+    messages = [
+        {"role": "user", "content": clean_text(question)},
+        {"role": "assistant", "content": clean_text(answer)},
+    ]
+    if include_system:
+        messages.insert(0, {"role": "system", "content": SYSTEM_PROMPT})
     return {
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": clean_text(question)},
-            {"role": "assistant", "content": clean_text(answer)},
-        ],
+        "messages": messages,
         "metadata": metadata,
     }
 
@@ -344,18 +346,37 @@ def curated_examples():
     for prompt in IDENTITY_PROMPTS:
         for suffix in identity_suffixes:
             for answer in IDENTITY_ANSWERS:
+                question = prompt + suffix
+                base_metadata = {
+                    "source_type": "curated",
+                    "title": prompt,
+                    "date": None,
+                    "era": "persona",
+                }
                 examples.append(
                     make_example(
-                        prompt + suffix,
+                        question,
                         answer,
                         {
+                            **base_metadata,
                             "example_type": "persona_lock",
-                            "source_type": "curated",
                             "source_id": f"persona_lock_{idx:04d}",
-                            "title": prompt,
-                            "date": None,
-                            "era": "persona",
+                            "has_system_prompt": True,
                         },
+                    )
+                )
+                idx += 1
+                examples.append(
+                    make_example(
+                        question,
+                        answer,
+                        {
+                            **base_metadata,
+                            "example_type": "persona_lock_no_system",
+                            "source_id": f"persona_lock_no_system_{idx:04d}",
+                            "has_system_prompt": False,
+                        },
+                        include_system=False,
                     )
                 )
                 idx += 1
@@ -372,7 +393,25 @@ def curated_examples():
                     "title": question,
                     "date": None,
                     "era": "persona",
+                    "has_system_prompt": True,
                 },
+            )
+        )
+        idx += 1
+        examples.append(
+            make_example(
+                question,
+                answer,
+                {
+                    "example_type": "greeting_persona_no_system",
+                    "source_type": "curated",
+                    "source_id": f"greeting_no_system_{idx:04d}",
+                    "title": question,
+                    "date": None,
+                    "era": "persona",
+                    "has_system_prompt": False,
+                },
+                include_system=False,
             )
         )
         idx += 1
@@ -405,9 +444,10 @@ def curated_examples():
     for group, pairs, suffixes in grouped_pairs:
         for question, answer in pairs:
             for suffix in suffixes:
+                full_question = question + suffix
                 examples.append(
                     make_example(
-                        question + suffix,
+                        full_question,
                         answer,
                         {
                             "example_type": group,
@@ -416,10 +456,29 @@ def curated_examples():
                             "title": question,
                             "date": None,
                             "era": "persona",
+                            "has_system_prompt": True,
                         },
                     )
                 )
                 idx += 1
+                if group in {"high_value_dialogue", "criticism_response", "off_domain_persona"}:
+                    examples.append(
+                        make_example(
+                            full_question,
+                            answer,
+                            {
+                                "example_type": f"{group}_no_system",
+                                "source_type": "curated",
+                                "source_id": f"{group}_no_system_{idx:04d}",
+                                "title": question,
+                                "date": None,
+                                "era": "persona",
+                                "has_system_prompt": False,
+                            },
+                            include_system=False,
+                        )
+                    )
+                    idx += 1
 
     return examples
 
@@ -541,9 +600,11 @@ def write_jsonl(path, rows):
 
 
 def summarize(rows):
-    assistant_lens = [len(r["messages"][2]["content"]) for r in rows]
+    assistant_lens = [len(r["messages"][-1]["content"]) for r in rows]
+    role_patterns = Counter(",".join(m["role"] for m in r["messages"]) for r in rows)
     return {
         "count": len(rows),
+        "role_pattern_distribution": dict(role_patterns),
         "example_type_distribution": dict(Counter(r["metadata"]["example_type"] for r in rows)),
         "source_type_distribution": dict(Counter(r["metadata"]["source_type"] for r in rows)),
         "era_distribution": dict(Counter(r["metadata"].get("era") or "unknown" for r in rows)),
@@ -574,9 +635,9 @@ def main():
 
     kept = []
     kept.extend(curated)
-    kept.extend(speech[:850])
-    kept.extend(quote[:200])
-    kept.extend(policy[:180])
+    kept.extend(speech[:700])
+    kept.extend(quote[:160])
+    kept.extend(policy[:120])
     rng.shuffle(kept)
 
     train, valid = split_train_valid(kept, valid_ratio=0.1, seed=42)
