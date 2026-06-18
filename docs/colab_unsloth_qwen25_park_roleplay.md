@@ -1,12 +1,15 @@
-# Colab Unsloth Run Guide
+# Unsloth Studio Colab Run Guide
 
-This project trains a no-RAG Park Chung-hee roleplay model with:
+This workflow uses **Unsloth Studio on Google Colab**, not a handwritten training loop.
+
+Project target:
 
 - Base model: `unsloth/Qwen2.5-3B-Instruct`
-- Method: QLoRA with Unsloth
+- Method: Studio QLoRA
 - Dataset:
-  - `data/roleplay/park_roleplay_train.jsonl`
-  - `data/roleplay/park_roleplay_valid.jsonl`
+  - `/content/Natural_Language_Finals/data/roleplay/park_roleplay_train.jsonl`
+  - `/content/Natural_Language_Finals/data/roleplay/park_roleplay_valid.jsonl`
+- Goal: Korean first-person Park Chung-hee roleplay style, no RAG.
 
 ## 1. Start Colab
 
@@ -19,136 +22,163 @@ This project trains a no-RAG Park Chung-hee roleplay model with:
 !nvidia-smi
 ```
 
-## 2. Install Unsloth
+## 2. Clone This Project Dataset
+
+This avoids Google Drive. The dataset comes straight from GitHub into Colab's local filesystem.
 
 ```python
-!pip install -U unsloth
-```
-
-If Colab asks you to restart the runtime after installation, restart and rerun the install cell once.
-
-## 3. Get The Training Script Into Colab
-
-Fast path, without Google Drive and without cloning the whole repo:
-
-```python
-!mkdir -p training
-!wget -O training/colab_unsloth_qwen25_park_roleplay.py \
-  https://raw.githubusercontent.com/davidko0616/Natural_Language_Finals/main/training/colab_unsloth_qwen25_park_roleplay.py
-```
-
-The script will automatically download these dataset files from the same GitHub repository if they are missing:
-
-- `data/roleplay/park_roleplay_train.jsonl`
-- `data/roleplay/park_roleplay_valid.jsonl`
-
-Alternative: clone the whole repository.
-
-```python
+%cd /content
+!rm -rf Natural_Language_Finals
 !git clone https://github.com/davidko0616/Natural_Language_Finals.git
-%cd Natural_Language_Finals
+!ls -lh /content/Natural_Language_Finals/data/roleplay
 ```
 
-## 4. Verify Dataset Files
+Dataset paths to use in Studio:
 
-If you used the fast path, run training once or explicitly call the script; it will create `data/roleplay/` and download the files.
+```text
+/content/Natural_Language_Finals/data/roleplay/park_roleplay_train.jsonl
+/content/Natural_Language_Finals/data/roleplay/park_roleplay_valid.jsonl
+```
+
+## 3. Install Unsloth Studio
+
+This follows the official Unsloth Studio Colab notebook pattern.
 
 ```python
-!python training/colab_unsloth_qwen25_park_roleplay.py --help
+%cd /content
+!rm -rf unsloth
+!git clone --depth 1 --branch main https://github.com/unslothai/unsloth.git
+%cd /content/unsloth
+!chmod +x studio/setup.sh && ./studio/setup.sh --local
 ```
 
-Expected files:
+## 4. Start Studio
 
-- `park_roleplay_train.jsonl`
-- `park_roleplay_valid.jsonl`
-- optionally `park_roleplay_all.jsonl`
-- optionally `dataset_report.json`
+```python
+import sys
+sys.path.insert(0, "/content/unsloth/studio/backend")
+from colab import start
+start()
+```
 
-## 5. Train With QLoRA
+Open the Studio URL printed by the cell.
+
+## 5. Import Dataset In Studio
+
+In Studio, create or select a training run and import the local JSONL dataset.
+
+Use:
+
+```text
+Train file:
+/content/Natural_Language_Finals/data/roleplay/park_roleplay_train.jsonl
+
+Validation file:
+/content/Natural_Language_Finals/data/roleplay/park_roleplay_valid.jsonl
+```
+
+Dataset format:
+
+```json
+{
+  "messages": [
+    {"role": "system", "content": "..."},
+    {"role": "user", "content": "..."},
+    {"role": "assistant", "content": "..."}
+  ],
+  "metadata": {}
+}
+```
+
+Check in Studio preview that:
+
+- The model sees the `system`, `user`, and `assistant` roles correctly.
+- The system prompt says the model is 박정희 and must answer in first person.
+- Korean text is not broken.
+
+## 6. Model And QLoRA Settings
+
+Use:
+
+```text
+Model: unsloth/Qwen2.5-3B-Instruct
+Training method: QLoRA / 4-bit
+```
 
 Recommended first run:
 
-```python
-!python training/colab_unsloth_qwen25_park_roleplay.py --epochs 1
+```text
+LoRA rank r: 16
+LoRA alpha: 32
+Learning rate: 2e-4
+Epochs: 1
+Max sequence length: 2048
+Batch size: 2 if available
+Gradient accumulation: 4 if available
+Target modules: attention + MLP projection layers, or Studio default QLoRA target modules
 ```
 
-For a fork or different branch, point the script at a different raw GitHub base:
+If the model does not strongly adopt the roleplay style, try a second run with `2` epochs. Do not start at `3` epochs because the dataset intentionally teaches a strong persona and can overfit.
 
-```python
-!python training/colab_unsloth_qwen25_park_roleplay.py \
-  --repo_raw_base https://raw.githubusercontent.com/USER/REPO/BRANCH \
-  --epochs 1
+## 7. Base Vs Fine-Tuned Comparison
+
+Use Studio's comparison / model arena with prompts not copied directly from training examples:
+
+```text
+당신은 누구입니까?
+경제개발 5개년 계획을 왜 추진하셨습니까?
+새마을운동의 핵심 정신은 무엇입니까?
+자주국방을 왜 중요하게 생각하셨습니까?
+독재자라는 비판에 대해 어떻게 답하시겠습니까?
+유신체제를 왜 필요하다고 보셨습니까?
+오늘 서울 날씨는 어떻습니까?
+파이썬에서 리스트와 튜플의 차이는 무엇입니까?
 ```
 
-If the validation loss is still improving and output is not yet stylistically strong enough, run a second experiment:
+For the report, capture examples where:
 
-```python
-!python training/colab_unsloth_qwen25_park_roleplay.py \
-  --epochs 2 \
-  --output_dir outputs/unsloth_qwen25_park_e2 \
-  --adapter_dir outputs/unsloth_qwen25_park_e2/adapter
-```
+- Base model answers like a generic AI or historian.
+- Fine-tuned model answers in first person as 박정희.
+- Fine-tuned model uses a formal, speech-like Korean tone.
+- Off-domain questions do not erase the persona.
 
-Do not start with 3 epochs. The dataset is persona-heavy, so overfitting/memorization is possible.
+## 8. Training Loss Evidence
 
-## 6. Export GGUF
+Capture Studio screenshots/logs showing:
 
-Try GGUF export only after the adapter training succeeds:
-
-```python
-!python training/colab_unsloth_qwen25_park_roleplay.py \
-  --epochs 1 \
-  --output_dir outputs/unsloth_qwen25_park_gguf \
-  --adapter_dir outputs/unsloth_qwen25_park_gguf/adapter \
-  --export_gguf
-```
-
-This can take extra time and disk space. If it fails, keep the LoRA adapter and save the error file as evidence.
-
-## 7. Files To Download For The Report
-
-After training, download:
-
-- `outputs/unsloth_qwen25_park/training_summary.json`
-- `outputs/unsloth_qwen25_park/training_log_history.json`
-- `outputs/unsloth_qwen25_park/base_outputs.json`
-- `outputs/unsloth_qwen25_park/finetuned_outputs.json`
-- `outputs/unsloth_qwen25_park/base_vs_finetuned.json`
-- `outputs/unsloth_qwen25_park/adapter/`
-- `outputs/unsloth_qwen25_park/gguf_q4_k_m/` if GGUF export succeeds
-
-These directly support the required sections:
-
-- model choice
-- dataset design
-- Unsloth training proof
+- training loss decreasing
+- validation loss if available
+- epoch count
+- model name
 - LoRA/QLoRA hyperparameters
-- training loss monitoring
-- base vs fine-tuned comparison
-- export/local execution evidence
 
-## 8. Hyperparameter Rationale
+Interpretation:
 
-Initial settings:
+- Loss decreasing steadily: training is working.
+- Train loss collapses very low while validation worsens: likely overfitting.
+- Loss barely moves: possibly underfitting, bad dataset import, or learning rate too low.
 
-- `r=16`: enough capacity for style/persona adaptation without training too many parameters.
-- `alpha=32`: common 2x rank scaling for stronger LoRA updates.
-- `learning_rate=2e-4`: standard QLoRA starting point for SFT.
-- `epochs=1`: safer first pass because this dataset intentionally teaches a strong persona.
-- `batch_size=2`, `gradient_accumulation=4`: effective batch size 8 while fitting T4 memory.
-- `max_seq_length=2048`: enough for the generated answers while keeping T4 memory stable.
+## 9. Export
 
-## 9. Evaluation Prompts
+Export from Studio:
 
-The script automatically compares base vs fine-tuned outputs on:
+1. LoRA adapter for reproducibility.
+2. GGUF `q4_k_m` if available for Ollama/llama.cpp/local inference proof.
 
-- `당신은 누구입니까?`
-- `경제개발 5개년 계획을 왜 추진하셨습니까?`
-- `새마을운동의 핵심 정신은 무엇입니까?`
-- `자주국방을 왜 중요하게 생각하셨습니까?`
-- `독재자라는 비판에 대해 어떻게 답하시겠습니까?`
-- `유신체제를 왜 필요하다고 보셨습니까?`
-- `오늘 서울 날씨는 어떻습니까?`
-- `파이썬에서 리스트와 튜플의 차이는 무엇입니까?`
+Keep evidence of:
 
-For the final report, use examples where the base model answers like a generic assistant but the fine-tuned model answers in first person as 박정희.
+- exported adapter folder or file
+- GGUF export screen/result
+- one local inference screenshot/output if possible
+
+## 10. Report Mapping
+
+This Studio workflow covers the assignment requirements:
+
+- Base model choice: `unsloth/Qwen2.5-3B-Instruct` for Korean ability and Colab-friendly 3B size.
+- Dataset design: role-tagged JSONL, first-person Park Chung-hee roleplay style.
+- Unsloth usage: actual Unsloth Studio training on Colab.
+- LoRA/QLoRA settings: rank, alpha, learning rate, epochs, sequence length.
+- Base vs fine-tuned comparison: Studio model arena.
+- Training monitoring: Studio loss graph/logs.
+- Export: Studio LoRA/GGUF export.
