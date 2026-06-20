@@ -2,6 +2,53 @@
 
 `unsloth/Qwen2.5-3B-Instruct`를 QLoRA로 미세조정한 한국어 역사 역할극 모델이다. 사용자가 박정희 전 대통령에게 질문하는 상황을 가정하며, 모델은 연설문·정책 기록에 기반한 1인칭 연설체로 답하도록 설계되었다.
 
+## 🚀 빠른 시작 (3단계)
+
+1. [Studio용 Colab 노트북](https://colab.research.google.com/github/davidko0616/Natural_Language_Finals/blob/main/notebooks/colab_unsloth_qwen25_park_roleplay.ipynb)을 연다. 또는 Colab에서 `파일 > 노트 업로드`를 선택해 `notebooks/colab_unsloth_qwen25_park_roleplay.ipynb`를 업로드한다.
+2. Colab 상단 메뉴에서 `런타임 > 런타임 유형 변경 > T4 GPU`를 선택한다.
+3. `런타임 > 모두 실행`을 선택한다.
+
+노트북은 자동으로 다음 작업을 수행한다.
+
+```text
+1. 이 저장소를 /content/Natural_Language_Finals에 clone
+2. 역할극 학습 데이터셋 준비
+3. Unsloth Studio 설치 및 실행
+```
+
+Studio에서 사용할 파일 경로는 다음과 같다.
+
+```text
+Train: /content/Natural_Language_Finals/data/roleplay/park_roleplay_train.jsonl
+Validation: /content/Natural_Language_Finals/data/roleplay/park_roleplay_valid.jsonl
+```
+
+## 📁 프로젝트 구조
+
+```text
+Natural_Language_Finals/
+├── README.md
+├── notebooks/
+│   └── colab_unsloth_qwen25_park_roleplay.ipynb  # ⭐ Unsloth Studio Colab 실행 노트북
+├── data/
+│   ├── raw/
+│   │   ├── speeches/                             # 대통령 연설문 원천 데이터
+│   │   ├── policies/                             # 대통령 정책 기록 원천 데이터
+│   │   └── quotes/                               # 박정희 어록·인용문 원천 데이터
+│   └── roleplay/
+│       ├── park_roleplay_train.jsonl             # ⭐ 역할극 학습 데이터
+│       ├── park_roleplay_valid.jsonl             # 역할극 검증 데이터
+│       └── dataset_report.json                   # 데이터셋 통계 및 구성 보고서
+├── scripts/
+│   └── build_roleplay_dataset.py                 # 원천 데이터 → 역할극 JSONL 생성기
+├── training/
+│   └── colab_unsloth_qwen25_park_roleplay.py     # 코드 기반 QLoRA 재현용 스크립트
+├── inference/
+│   └── run_gguf_smoke_test.py                    # GGUF 다운로드·추론·출력 점검
+└── docs/
+    └── colab_unsloth_qwen25_park_roleplay.md     # Studio 실행 및 설정 상세 안내
+```
+
 ## 프로젝트 소개
 
 ### 도메인과 페르소나
