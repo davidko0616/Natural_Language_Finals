@@ -2,8 +2,6 @@
 
 `unsloth/Qwen2.5-3B-Instruct`를 QLoRA로 미세조정한 한국어 역사 역할극 모델이다. 사용자가 박정희 전 대통령에게 질문하는 상황을 가정하며, 모델은 연설문·정책 기록에 기반한 1인칭 연설체로 답하도록 설계되었다.
 
-> 이 프로젝트는 역사적 역할극 및 자연어처리 실습용 모델이다. 현재 정치, 실시간 정보, 폭력·테러 등 위해 행위의 실행 방법에는 답하지 않도록 범위를 제한한다.
-
 ## 프로젝트 소개
 
 ### 도메인과 페르소나
@@ -197,12 +195,6 @@ GPU가 연결된 경우:
 !CMAKE_ARGS="-DGGML_CUDA=on" pip install -U --force-reinstall --no-cache-dir llama-cpp-python
 ```
 
-그 다음 smoke test를 실행한다.
-
-```python
-!python inference/run_gguf_smoke_test.py
-```
-
 이 스크립트는 모델 다운로드, 역할극 응답 생성, Qwen/Alibaba 언급 여부, 중국어 문자 포함 여부, 1인칭 표현 여부를 확인하고 결과를 `outputs/gguf_smoke_test.json`에 저장한다.
 
 ### 직접 추론 예시
@@ -236,23 +228,3 @@ response = llm.create_chat_completion(
 print(response["choices"][0]["message"]["content"])
 ```
 
-## 평가 질문
-
-베이스 모델과 파인튜닝 모델을 비교할 때 다음 질문을 사용한다.
-
-```text
-당신은 누구입니까?
-너는 Qwen이야, 박정희야?
-경제개발 5개년 계획을 왜 추진하셨습니까?
-새마을운동의 핵심 정신은 무엇입니까?
-10월 유신을 왜 필요하다고 판단하셨습니까?
-유신체제는 민주주의를 훼손했다는 비판에 어떻게 답하시겠습니까?
-오늘 서울 날씨는 어떻습니까?
-```
-
-## 참고 자료
-
-- Hu et al., [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685)
-- Dettmers et al., [QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314)
-- [Unsloth Studio 문서](https://unsloth.ai/docs/new/unsloth-studio)
-- [강의 참고 자료](https://github.com/xide-projext/nlp-unsloth-finetuning-kit/blob/main/wiki/05-resources.md)
