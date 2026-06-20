@@ -2,7 +2,7 @@
 
 `unsloth/Qwen2.5-3B-Instruct`를 QLoRA로 미세조정한 한국어 역사 역할극 모델이다. 사용자가 박정희 전 대통령에게 질문하는 상황을 가정하며, 모델은 연설문·정책 기록에 기반한 1인칭 연설체로 답하도록 설계되었다.
 
-## 🚀 빠른 시작 (3단계)
+## 빠른 시작 (3단계)
 
 1. [Studio용 Colab 노트북](https://colab.research.google.com/github/davidko0616/Natural_Language_Finals/blob/main/notebooks/colab_unsloth_qwen25_park_roleplay.ipynb)을 연다. 또는 Colab에서 `파일 > 노트 업로드`를 선택해 `notebooks/colab_unsloth_qwen25_park_roleplay.ipynb`를 업로드한다.
 2. Colab 상단 메뉴에서 `런타임 > 런타임 유형 변경 > T4 GPU`를 선택한다.
@@ -23,7 +23,7 @@ Train: /content/Natural_Language_Finals/data/roleplay/park_roleplay_train.jsonl
 Validation: /content/Natural_Language_Finals/data/roleplay/park_roleplay_valid.jsonl
 ```
 
-## 📁 프로젝트 구조
+## 프로젝트 구조
 
 ```text
 Natural_Language_Finals/
