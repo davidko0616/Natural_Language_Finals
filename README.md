@@ -4,19 +4,19 @@
 
 ## 빠른 시작 (3단계)
 
-1. [Studio용 Colab 노트북](https://colab.research.google.com/github/davidko0616/Natural_Language_Finals/blob/main/notebooks/colab_unsloth_qwen25_park_roleplay.ipynb)을 연다. 또는 Colab에서 `파일 > 노트 업로드`를 선택해 `notebooks/colab_unsloth_qwen25_park_roleplay.ipynb`를 업로드한다.
+1. [Park_roleplaying Colab 노트북](https://colab.research.google.com/github/davidko0616/Natural_Language_Finals/blob/main/davidko0616_Park_roleplaying.ipynb)을 연다. 또는 Colab에서 `파일 > 노트 업로드`를 선택해 `davidko0616_Park_roleplaying.ipynb`를 업로드한다.
 2. Colab 상단 메뉴에서 `런타임 > 런타임 유형 변경 > T4 GPU`를 선택한다.
 3. `런타임 > 모두 실행`을 선택한다.
 
 노트북은 자동으로 다음 작업을 수행한다.
 
 ```text
-1. 이 저장소를 /content/Natural_Language_Finals에 clone
-2. 역할극 학습 데이터셋 준비
-3. Unsloth Studio 설치 및 실행
+1. CUDA 지원 `llama-cpp-python` 설치
+2. Hugging Face에서 `davidko0616/Park_roleplaying` GGUF 모델 다운로드
+3. Colab T4 GPU에서 역할극 모델 로드 및 추론 실행
 ```
 
-Studio에서 사용할 파일 경로는 다음과 같다.
+파인튜닝을 재현하려는 경우에는 `notebooks/colab_unsloth_qwen25_park_roleplay.ipynb`를 사용한다. Studio에서 사용할 파일 경로는 다음과 같다.
 
 ```text
 Train: /content/Natural_Language_Finals/data/roleplay/park_roleplay_train.jsonl
@@ -28,8 +28,9 @@ Validation: /content/Natural_Language_Finals/data/roleplay/park_roleplay_valid.j
 ```text
 Natural_Language_Finals/
 ├── README.md
+├── davidko0616_Park_roleplaying.ipynb             # ⭐ GGUF 모델 Colab 추론 노트북
 ├── notebooks/
-│   └── colab_unsloth_qwen25_park_roleplay.ipynb  # ⭐ Unsloth Studio Colab 실행 노트북
+│   └── colab_unsloth_qwen25_park_roleplay.ipynb  # Unsloth Studio Colab 학습 노트북
 ├── data/
 │   ├── raw/
 │   │   ├── speeches/                             # 대통령 연설문 원천 데이터
