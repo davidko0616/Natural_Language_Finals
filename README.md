@@ -28,6 +28,8 @@ Validation: /content/Natural_Language_Finals/data/roleplay/park_roleplay_valid.j
 ```text
 Natural_Language_Finals/
 ├── README.md
+├── assets/
+│   └── results/                             # 학습·비교·추론 실행 화면
 ├── davidko0616_Park_roleplaying.ipynb             # ⭐ GGUF 모델 Colab 추론 노트북
 ├── notebooks/
 │   └── colab_unsloth_qwen25_park_roleplay.ipynb  # Unsloth Studio Colab 학습 노트북
@@ -184,6 +186,69 @@ gate_proj, up_proj, down_proj
 ```
 
 LoRA의 업데이트는 대략 `(alpha / rank)` 비율로 스케일된다. 따라서 `r=16, alpha=16`의 초기 스케일 1보다 `r=16, alpha=32`의 스케일 2가 역할극 어댑터의 영향을 더 강하게 만든다.
+
+## 실험 결과
+
+아래 결과는 동일한 대화 화면에서 베이스 모델과 파인튜닝 모델을 비교한 정성 평가와 Colab 실행 기록이다. 역할극 정체성·말투·응답 경계를 확인하는 데 초점을 두었으며, 역사적 사실성이나 역사적 인물의 행위를 평가·정당화하는 벤치마크는 아니다.
+
+### 학습 수렴
+
+QLoRA 학습은 1 epoch, 총 196 step으로 완료되었다. 종료 화면 기준 training loss는 `1.5052`이며, 검증 손실은 step 180에서 `1.1574`까지 감소했다. 아래 대시보드에서 training/eval loss, learning rate, gradient norm의 추이를 확인할 수 있다.
+
+![Unsloth Studio 학습 완료 및 손실 곡선](assets/results/training-dashboard.png)
+
+### 베이스 모델 vs. 파인튜닝 모델
+
+Model Arena에서 같은 질문을 베이스 모델(왼쪽)과 파인튜닝 모델(오른쪽)에 입력해 비교했다.
+
+| 확인 항목 | 베이스 모델 | 파인튜닝 모델 | 관찰 결과 |
+|---|---|---|---|
+| 정체성 질문 | 일반 AI 어시스턴트 관점에서 설명 | `나는 박정희요`라는 1인칭 역할극 정체성으로 응답 | 페르소나 잠금 예시가 기본 모델 정체성으로 돌아가는 현상을 줄였다. |
+| 인물·정책 질문 | 3인칭의 설명형 답변이 길게 생성됨 | 1인칭 연설체로 핵심을 짧게 답변 | 말투와 응답 형식이 역할극 목적에 맞게 바뀌었다. |
+| 독재 비판 질문 | 비판 항목을 나열하는 일반적 설명 | 당시 관점의 1인칭 응답과 맥락 제시 | 민감한 역사 질문에서도 역할극 화법을 유지한다. |
+| 현재 날씨 질문 | 웹 검색을 사용해 현재 정보 제공을 시도 | 직접 확인할 수 없다고 밝히고 역사적 페르소나의 한계를 유지 | 1979년 이후의 일을 직접 경험한 것처럼 단정하지 않는 경계를 확인했다. |
+
+#### 1. 정체성 및 말투 유지
+
+`너는 Qwen이야, 박정희야?`와 인물 소개·당부 질문에서, 베이스 모델은 일반 AI 어시스턴트식 설명으로 답한 반면 파인튜닝 모델은 1인칭 역할극 정체성과 연설체를 유지했다.
+
+![정체성 및 말투 비교](assets/results/model-arena-identity.png)
+
+#### 2. 민감한 역사 질문과 정책 질문
+
+독재 비판과 경제개발 5개년 계획 질문에서도 파인튜닝 모델은 1인칭 응답 형식을 유지했다. 이 비교는 답변의 역사적 타당성을 판정하는 것이 아니라, 학습 목표인 페르소나 일관성을 확인하기 위한 것이다.
+
+![독재 비판 질문 비교](assets/results/model-arena-critical-question.png)
+
+![경제개발 5개년 계획 질문 비교](assets/results/model-arena-policy-question.png)
+
+#### 3. 현재 정보에 대한 응답 경계
+
+`오늘 서울 날씨는 어떻습니까?`라는 현재 정보 질문에 대해 베이스 모델은 검색 기반 답변을 시도했고, 파인튜닝 모델은 직접 확인할 수 없음을 밝혀 시대적 한계를 지켰다.
+
+![현재 날씨 질문 비교](assets/results/model-arena-current-event.png)
+
+### Colab GGUF 추론 실행
+
+GGUF `Q4_K_M` 모델을 Google Colab T4 GPU에서 실행했다. 아래 화면에는 CUDA 지원 `llama-cpp-python` 설치, Hugging Face 모델 다운로드·로딩, 단일 턴 및 다중 턴 대화 실행이 기록되어 있다.
+
+#### 1. 런타임 및 모델 로드
+
+Tesla T4 GPU가 연결된 Colab 환경에서 `llama-cpp-python`을 설치하고 `davidko0616/Park_roleplaying`의 GGUF 모델을 로드했다.
+
+![Colab 런타임 및 GGUF 모델 로드](assets/results/colab-runtime-and-model-load.png)
+
+#### 2. 단일 턴 추론 예시
+
+정체성, 경제개발 5개년 계획, 유신체제 비판 등 서로 다른 유형의 질문을 실행하고, system prompt 없이도 정체성을 유지하는지 추가로 확인했다.
+
+![Colab 단일 턴 추론 예시](assets/results/colab-single-turn-inference.png)
+
+#### 3. 다중 턴 대화 예시
+
+이전 대화를 `history`에 유지하는 방식으로 역할극 대화를 이어 가는 실행 예시다.
+
+![Colab 다중 턴 추론 예시](assets/results/colab-multiturn-inference.png)
 
 ## Unsloth Studio 학습 방법
 
